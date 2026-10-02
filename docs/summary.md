@@ -1,6 +1,6 @@
 # Challenge 5 Reflection
 
-Answer both questions. **200 words minimum across the whole document.**
+Answer both questions. **200 words minimum across the document.**
 You are graded on whether the reasoning is correct and specific to what
 your own run printed. Write each answer in place of the placeholder under
 its question.
