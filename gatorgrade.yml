@@ -1,0 +1,112 @@
+# Automated checks for Challenge 5. Run them yourself with:
+#
+#     uv run gatorgrade --config gatorgrade.yml
+#
+# These are the same checks that run on GitHub when you push. Results are
+# preliminary: the final grade is determined by the instructor.
+
+- description: "[JOINT] The joint is one entry from each table, multiplied"
+  check: ExecuteCommand
+  options:
+    command: uv run pytest tests/test_vehicle.py::test_joint_is_one_entry_from_each_table_multiplied
+
+- description: "[JOINT] The joint reads the row for the parents' values"
+  check: ExecuteCommand
+  options:
+    command: uv run pytest tests/test_vehicle.py::test_joint_reads_the_row_for_the_parents_values
+
+- description: "[JOINT] The joint is zero where a table says impossible"
+  check: ExecuteCommand
+  options:
+    command: uv run pytest tests/test_vehicle.py::test_joint_is_zero_where_a_table_says_impossible
+
+- description: "[JOINT] The joint sums to 1 over all 64 assignments"
+  check: ExecuteCommand
+  options:
+    command: uv run pytest tests/test_vehicle.py::test_joint_sums_to_one_over_every_assignment
+
+- description: "[JOINT] The joint works on a second network, the Week 7 detector"
+  check: ExecuteCommand
+  options:
+    command: uv run pytest tests/test_vehicle.py::test_joint_works_on_a_second_network
+
+- description: "[QUERY] A query answers for every value of the variable"
+  check: ExecuteCommand
+  options:
+    command: uv run pytest tests/test_vehicle.py::test_query_gives_a_value_for_every_value_of_the_variable
+
+- description: "[QUERY] With no evidence, a node with no parents gets its own table"
+  check: ExecuteCommand
+  options:
+    command: uv run pytest tests/test_vehicle.py::test_query_with_no_evidence_gives_a_parentless_node_its_table
+
+- description: "[QUERY] A query sums out the hidden variables"
+  check: ExecuteCommand
+  options:
+    command: uv run pytest tests/test_vehicle.py::test_query_sums_out_the_hidden_variables
+
+- description: "[QUERY] Every answer adds up to 1"
+  check: ExecuteCommand
+  options:
+    command: uv run pytest tests/test_vehicle.py::test_query_answers_add_up_to_one
+
+- description: "[QUERY] A flagged essay is AI-written with probability 2/3, as in Week 7"
+  check: ExecuteCommand
+  options:
+    command: uv run pytest tests/test_vehicle.py::test_query_turns_a_flag_around_into_the_author
+
+- description: "[QUERY] A query uses two pieces of evidence together"
+  check: ExecuteCommand
+  options:
+    command: uv run pytest tests/test_vehicle.py::test_query_uses_two_pieces_of_evidence
+
+- description: "[QUERY] A query leaves the caller's evidence unchanged"
+  check: ExecuteCommand
+  options:
+    command: uv run pytest tests/test_vehicle.py::test_query_leaves_the_evidence_unchanged
+
+- description: "[CAR] The question from 2023: pedestrians, given the car protected its occupants"
+  check: ExecuteCommand
+  options:
+    command: uv run pytest tests/test_vehicle.py::test_the_question_from_2023
+
+- description: "[CAR] Poor visibility makes a missed detection mean less"
+  check: ExecuteCommand
+  options:
+    command: uv run pytest tests/test_vehicle.py::test_poor_visibility_makes_a_missed_detection_mean_less
+
+- description: "[CAR] The two action tables trade one harm for another"
+  check: ExecuteCommand
+  options:
+    command: uv run pytest tests/test_vehicle.py::test_the_two_action_tables_trade_one_harm_for_another
+
+- description: "[STYLE] Code follows the Google Python style guide"
+  check: ExecuteCommand
+  options:
+    command: uv run ruff check src tests
+
+- description: "[STYLE] Type annotations check out"
+  check: ExecuteCommand
+  options:
+    command: uv run mypy src tests
+
+- src/vehicle.py:
+  - description: "[STYLE] No unfinished TODO markers are left in vehicle.py"
+    check: MatchFileFragment
+    options:
+      fragment: "TODO"
+      count: 0
+      exact: true
+
+- docs/summary.md:
+  - description: "[REFLECTION] The reflection has no TODO markers left in it"
+    check: MatchFileFragment
+    options:
+      fragment: "TODO"
+      count: 0
+      exact: true
+  - description: "[REFLECTION] The reflection meets the 200 word minimum"
+    check: CountFileWords
+    options:
+      count: 200
+      exact: false

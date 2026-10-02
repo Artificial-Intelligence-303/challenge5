@@ -1,0 +1,43 @@
+name: Verbal Check
+description: The short spoken check on a challenge, done in lab with the instructor.
+title: "Challenge 5 Verbal Check"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Filled in by the instructor or a technical leader during lab. The student
+        answers two or three questions about their own code in the context of the
+        assignment at hand. This is a check on understanding, not a presentation.
+
+        Challenge 5 asked for two functions in `src/vehicle.py`: `joint_probability`,
+        which multiplies one entry from each node's table, and `query`, which answers
+        a question by enumeration. Every line below is about one of those two.
+        Questions for each line, with what to listen for:
+        https://areweagentsyet.com/tl/verbal-checks-challenge-05/
+  - type: input
+    attributes:
+      label: Student
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: Understanding
+      description: Tick each line the student explained correctly, in their own words. Two or three questions is enough; no line needs their code open or a remembered number.
+      options:
+        - label: "The product they wrote. Which row of a table `joint_probability` reads, and why the joint of a network is a product of table entries."
+        - label: "The sum they wrote. Which variables `query` sums over, which it holds fixed, and what the sum for one value means."
+        - label: "Normalizing. What the sums are before scaling, why they do not add to 1, and what alpha is."
+        - label: "Reading the network. Why evidence about the action says less about pedestrians than in 2023, or why poor visibility changes what a missed detection means."
+  - type: dropdown
+    attributes:
+      label: Outcome
+      options:
+        - "Passed: explained their own work clearly"
+        - "Passed with gaps: correct code, shaky explanation"
+        - "Not yet: could not provide clear answers, can redo with a token use"
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Notes
+      description: What to follow up on, and anything worth remembering for the next challenge.
