@@ -2,9 +2,9 @@
 
 |                    |                                             |
 | :----------------- | :------------------------------------------ |
-| `Tuesday 13 Oct`   | Released, in lab                            |
-| `Tuesday 20 Oct`   | Due at 2:30pm, the start of lab             |
-| `Tuesday 20 Oct`   | Verbal checks, during that same lab session |
+| `Thursday 15 Oct`  | Released, in class                          |
+| `Thursday 22 Oct`  | Due at 11:00am, the start of class          |
+| `Tuesday 27 Oct`   | Verbal checks, in lab                       |
 | Points             | 3                                           |
 
 An autonomous car faces an accident it cannot avoid. It takes either the
