@@ -67,7 +67,7 @@ def show_roads() -> None:
                 cells.append(posterior(prior, sensor, report)["present"])
             print(row(f"P(present | {name} = {report})", cells))
 
-    print("\nA preview of naive Bayes: both sensors at once\n")
+    print("\nA preview of the naive Bayes algorithm: both sensors at once\n")
     for camera, lidar in [("yes", "yes"), ("yes", "no"), ("no", "yes")]:
         cells = []
         for prior in [DOWNTOWN, HIGHWAY]:

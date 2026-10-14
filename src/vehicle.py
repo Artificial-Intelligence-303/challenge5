@@ -191,11 +191,11 @@ def naive_bayes(
 ) -> Distribution:
     """Return the posterior after several sensors' reports.
 
-    Provided: a preview of naive Bayes, which comes back in class. Each
-    report updates the belief by Bayes' rule, and the posterior after one
-    report is the prior for the next. That is only right if the sensors
-    make their mistakes independently once the hypothesis is known, which
-    is the assumption that makes naive Bayes naive.
+    Provided: a preview of the naive Bayes algorithm, which comes back in
+    class. Each report updates the belief by Bayes' rule, and the posterior
+    after one report is the prior for the next. That is only right if the
+    sensors make their mistakes independently once the hypothesis is known,
+    which is the assumption that makes naive Bayes naive.
 
     Example: the camera and the lidar both say yes downtown. The camera's
     yes takes P(present) from 0.3 to 0.785; the lidar's yes then takes it

@@ -80,7 +80,7 @@
   options:
     command: uv run pytest tests/test_vehicle.py::test_posterior_leaves_its_arguments_unchanged
 
-- description: "[CAR] Naive Bayes, built on your posterior, combines both sensors"
+- description: "[CAR] The naive Bayes algorithm, built on your posterior, combines both sensors"
   check: ExecuteCommand
   options:
     command: uv run pytest tests/test_vehicle.py::test_naive_bayes_combines_both_sensors

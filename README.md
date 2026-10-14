@@ -71,7 +71,7 @@ for any number of hypotheses.
 
 `naive_bayes` combines several sensors' reports by calling your
 `posterior` once per report, so the posterior after one report is the prior
-for the next. That is **naive Bayes**: it assumes the sensors make their
+for the next. That is the **naive Bayes algorithm**: it assumes the sensors make their
 mistakes independently once the hypothesis is known. Read it; it is three
 lines, and it is right only if your `posterior` is.
 
