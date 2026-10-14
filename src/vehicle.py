@@ -21,6 +21,20 @@ of every value the sensor can report, given that hypothesis:
 
 Read it as P(camera = yes | present) = 0.85. Every number in every table is
 invented for this challenge.
+
+From a formula to a dictionary lookup:
+
+    P(h)        prior[hypothesis]              DOWNTOWN["present"] is 0.3
+    P(e | h)    likelihood[hypothesis][report] LIDAR["present"]["yes"] is 0.9
+
+Every docstring below works one example by hand: the lidar downtown. Check
+each function against it as you write it, before moving on, because
+`posterior` calls `evidence_probability`. For example, in `uv run python`:
+
+    >>> import sys; sys.path.insert(0, "src")
+    >>> from vehicle import DOWNTOWN, LIDAR, evidence_probability
+    >>> evidence_probability(DOWNTOWN, LIDAR, "yes")
+    0.305
 """
 
 Distribution = dict[str, float]
@@ -70,8 +84,26 @@ def joint(
 ) -> dict[tuple[str, str], float]:
     """Return the joint probability of every hypothesis and every report.
 
-    The product rule: P(h and e) = P(h) * P(e | h). This is the table of
-    1,000 cases from class, divided by 1,000.
+    The product rule, for every hypothesis h and every report e:
+
+        P(h and e) = P(h) * P(e | h)
+
+    This is the table of 1,000 cases from class, divided by 1,000: one cell
+    for each hypothesis and report.
+
+    In code: start with an empty dictionary. Loop over the hypotheses in
+    `likelihood`, and inside that over the reports in
+    `likelihood[hypothesis]`. Store `prior[hypothesis]` times
+    `likelihood[hypothesis][report]` under the key `(hypothesis, report)`.
+
+    Worked example, the lidar downtown:
+
+        ("present", "yes")   0.3 * 0.90 = 0.270
+        ("present", "no")    0.3 * 0.10 = 0.030
+        ("absent", "yes")    0.7 * 0.05 = 0.035
+        ("absent", "no")     0.7 * 0.95 = 0.665
+
+    The four cells add up to 1.
 
     Args:
         prior: The probability of each hypothesis.
@@ -90,8 +122,19 @@ def evidence_probability(
 ) -> float:
     """Return the probability that the sensor reports `observed`.
 
-    The law of total probability: P(e) is the sum over the hypotheses of
-    P(h) * P(e | h).
+    The law of total probability, with a sum over every hypothesis h:
+
+        P(e) = sum of P(h) * P(e | h)
+
+    It is the column total of the joint table: every way the report can
+    happen, a real pedestrian or a false alarm.
+
+    In code: start a total at 0, loop over the hypotheses in `prior`, and
+    add `prior[hypothesis] * likelihood[hypothesis][observed]` each time.
+
+    Worked example, the lidar downtown says yes:
+
+        P(yes) = 0.3 * 0.90 + 0.7 * 0.05 = 0.270 + 0.035 = 0.305
 
     Args:
         prior: The probability of each hypothesis.
@@ -110,8 +153,25 @@ def posterior(
 ) -> Distribution:
     """Return the probability of each hypothesis once `observed` is seen.
 
-    Bayes' rule: P(h | e) = P(e | h) * P(h) / P(e), for every hypothesis.
-    There may be two hypotheses or more.
+    Bayes' rule, for every hypothesis h, where e is the report:
+
+        P(h | e) = P(e | h) * P(h) / P(e)
+
+    The top is one cell of the joint table; the bottom is that cell's
+    column total, from `evidence_probability`. There may be two hypotheses
+    or more: the same line works for each.
+
+    In code: call `evidence_probability` once for the bottom. Then start a
+    new, empty dictionary, loop over the hypotheses in `prior`, and store
+    each one's top divided by the bottom. Do not change `prior`.
+
+    Worked example, the lidar downtown says yes:
+
+        P(present | yes) = 0.90 * 0.3 / 0.305 = 0.270 / 0.305 = 0.885
+        P(absent | yes)  = 0.05 * 0.7 / 0.305 = 0.035 / 0.305 = 0.115
+
+    The answers add up to 1. Note that 0.885 is not 0.90: P(present | yes)
+    and P(yes | present) are different numbers.
 
     Args:
         prior: The probability of each hypothesis. Not changed.
@@ -131,11 +191,15 @@ def naive_bayes(
 ) -> Distribution:
     """Return the posterior after several sensors' reports.
 
-    Provided: a preview of naive Bayes, which comes back in Challenge 6.
-    Each report updates the belief by Bayes' rule, and the posterior after
-    one report is the prior for the next. That is only right if the sensors
+    Provided: a preview of naive Bayes, which comes back in class. Each
+    report updates the belief by Bayes' rule, and the posterior after one
+    report is the prior for the next. That is only right if the sensors
     make their mistakes independently once the hypothesis is known, which
     is the assumption that makes naive Bayes naive.
+
+    Example: the camera and the lidar both say yes downtown. The camera's
+    yes takes P(present) from 0.3 to 0.785; the lidar's yes then takes it
+    from 0.785 to 0.985.
 
     Args:
         prior: The probability of each hypothesis.
@@ -146,6 +210,6 @@ def naive_bayes(
         A probability for every hypothesis, summing to 1.
     """
     belief = prior
-    for likelihood, observed in zip(likelihoods, observations, strict=True):
-        belief = posterior(belief, likelihood, observed)
+    for sensor in range(len(likelihoods)):
+        belief = posterior(belief, likelihoods[sensor], observations[sensor])
     return belief

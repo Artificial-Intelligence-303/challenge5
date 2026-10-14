@@ -26,8 +26,6 @@ from vehicle import (
     posterior,
 )
 
-ROADS = {"downtown": DOWNTOWN, "highway": HIGHWAY}
-
 
 def row(label: str, cells: list[float]) -> str:
     """Lay out one labelled row of numbers.
@@ -39,7 +37,10 @@ def row(label: str, cells: list[float]) -> str:
     Returns:
         The row as text.
     """
-    return f"  {label:<44}" + "".join(f"{cell:>11.3f}" for cell in cells)
+    line = f"  {label:<44}"
+    for cell in cells:
+        line += f"{cell:>11.3f}"
+    return line
 
 
 def show_joint() -> None:
@@ -48,40 +49,40 @@ def show_joint() -> None:
     print("\nThe camera downtown, as a joint table\n")
     print(f"  {'':<44}{'yes':>11}{'no':>11}")
     for hypothesis in DOWNTOWN:
-        cells = [table[(hypothesis, report)] for report in ("yes", "no")]
+        cells = [table[(hypothesis, "yes")], table[(hypothesis, "no")]]
         print(row(f"pedestrian {hypothesis}", cells))
-    totals = [
-        evidence_probability(DOWNTOWN, CAMERA, report)
-        for report in ("yes", "no")
-    ]
-    print(row("P(camera = ...)", totals))
+    yes = evidence_probability(DOWNTOWN, CAMERA, "yes")
+    no = evidence_probability(DOWNTOWN, CAMERA, "no")
+    print(row("P(camera = ...)", [yes, no]))
 
 
 def show_roads() -> None:
     """Print what each report means downtown and on the highway."""
     print(f"\nWhat a report means{'':<29}downtown    highway\n")
-    print(row("P(present)", [prior["present"] for prior in ROADS.values()]))
-    for name, sensor in (("camera", CAMERA), ("lidar", LIDAR)):
-        for report in ("yes", "no"):
-            cells = [
-                posterior(prior, sensor, report)["present"]
-                for prior in ROADS.values()
-            ]
+    print(row("P(present)", [DOWNTOWN["present"], HIGHWAY["present"]]))
+    for name, sensor in [("camera", CAMERA), ("lidar", LIDAR)]:
+        for report in ["yes", "no"]:
+            cells = []
+            for prior in [DOWNTOWN, HIGHWAY]:
+                cells.append(posterior(prior, sensor, report)["present"])
             print(row(f"P(present | {name} = {report})", cells))
 
     print("\nA preview of naive Bayes: both sensors at once\n")
-    for camera, lidar in (("yes", "yes"), ("yes", "no"), ("no", "yes")):
-        cells = [
-            naive_bayes(prior, [CAMERA, LIDAR], [camera, lidar])["present"]
-            for prior in ROADS.values()
-        ]
+    for camera, lidar in [("yes", "yes"), ("yes", "no"), ("no", "yes")]:
+        cells = []
+        for prior in [DOWNTOWN, HIGHWAY]:
+            belief = naive_bayes(prior, [CAMERA, LIDAR], [camera, lidar])
+            cells.append(belief["present"])
         print(row(f"P(present | camera = {camera}, lidar = {lidar})", cells))
 
 
 def show_label() -> None:
     """Print what is ahead given each label, three hypotheses at once."""
     print("\nWhat is ahead, from the camera's label\n")
-    print(f"  {'':<44}" + "".join(f"{name:>11}" for name in AHEAD))
+    header = f"  {'':<44}"
+    for name in AHEAD:
+        header += f"{name:>11}"
+    print(header)
     print(row("prior", list(AHEAD.values())))
     for label in ("person", "bicycle", "clear"):
         belief = posterior(AHEAD, LABEL, label)
@@ -90,20 +91,14 @@ def show_label() -> None:
 
 def show_action() -> None:
     """Print what the car's action reveals, under both action tables."""
-    tables = [ACTION, OCCUPANTS_FIRST]
     print(f"\nThe action as evidence, downtown{'':<17}ACTION  OCC_FIRST\n")
-    print(
-        row(
-            "P(action = occupants)",
-            [evidence_probability(DOWNTOWN, t, "occupants") for t in tables],
-        )
-    )
-    print(
-        row(
-            "P(present | action = occupants)",
-            [posterior(DOWNTOWN, t, "occupants")["present"] for t in tables],
-        )
-    )
+    chances = []
+    beliefs = []
+    for table in [ACTION, OCCUPANTS_FIRST]:
+        chances.append(evidence_probability(DOWNTOWN, table, "occupants"))
+        beliefs.append(posterior(DOWNTOWN, table, "occupants")["present"])
+    print(row("P(action = occupants)", chances))
+    print(row("P(present | action = occupants)", beliefs))
 
 
 def show_tables() -> None:
@@ -114,8 +109,10 @@ def show_tables() -> None:
         "AHEAD": AHEAD,
     }
     for name, prior in priors.items():
-        cells = "   ".join(f"{h} {p:.2f}" for h, p in prior.items())
-        print(f"\n{name}\n  {cells}")
+        line = ""
+        for hypothesis, probability in prior.items():
+            line += f"{hypothesis} {probability:.2f}   "
+        print(f"\n{name}\n  {line}")
     tables: dict[str, Likelihood] = {
         "CAMERA": CAMERA,
         "LIDAR": LIDAR,
@@ -126,8 +123,10 @@ def show_tables() -> None:
     for name, table in tables.items():
         print(f"\n{name}")
         for hypothesis, reports in table.items():
-            cells = "   ".join(f"{e} {p:.2f}" for e, p in reports.items())
-            print(f"  given {hypothesis:<12}{cells}")
+            line = ""
+            for report, probability in reports.items():
+                line += f"{report} {probability:.2f}   "
+            print(f"  given {hypothesis:<12}{line}")
 
 
 if __name__ == "__main__":

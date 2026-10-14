@@ -72,8 +72,39 @@ for any number of hypotheses.
 `naive_bayes` combines several sensors' reports by calling your
 `posterior` once per report, so the posterior after one report is the prior
 for the next. That is **naive Bayes**: it assumes the sensors make their
-mistakes independently once the hypothesis is known. Read it; it is four
+mistakes independently once the hypothesis is known. Read it; it is three
 lines, and it is right only if your `posterior` is.
+
+## From the formula to code
+
+Every function is one formula from class. Each formula is a product, a sum,
+or a division, and each turns into a short loop over a dictionary.
+
+| In the formula | In Python |
+| :------------- | :-------- |
+| P(h) | `prior[hypothesis]` |
+| P(e \| h) | `likelihood[hypothesis][report]` |
+| P(h and e) = P(h) P(e \| h) | `prior[hypothesis] * likelihood[hypothesis][report]` |
+| P(e) = sum over h of P(h) P(e \| h) | a total that starts at 0, with one `+=` per hypothesis |
+| P(h \| e) = P(e \| h) P(h) / P(e) | one division per hypothesis, by the same P(e) |
+
+It is the table of 1,000 cases from class, without the 1,000. `joint`
+fills in the cells; `evidence_probability` is a column total; `posterior`
+divides each cell in a column by that column's total.
+
+Each function's docstring works one example by hand, the lidar downtown.
+Write the functions in order and check each against its example before the
+next, because `posterior` calls `evidence_probability`:
+
+```
+uv run python
+>>> import sys; sys.path.insert(0, "src")
+>>> from vehicle import DOWNTOWN, LIDAR, evidence_probability, posterior
+>>> evidence_probability(DOWNTOWN, LIDAR, "yes")
+0.305
+>>> posterior(DOWNTOWN, LIDAR, "yes")
+{'present': 0.885..., 'absent': 0.114...}
+```
 
 ## Running it
 
@@ -156,9 +187,8 @@ Concretely, for this assignment:
 - **Check one answer by hand.** P(present | camera = yes) on the highway
   needs two cells of the camera's table and the prior. Work it out on paper
   and compare it with `main.py`.
-- **A tool is useful** for the Python around the probability: how to build
-  a dictionary with a comprehension, or how to loop over a dictionary's
-  keys and values together.
+- **A tool is useful** for the Python around the probability: how to add
+  entries to a dictionary in a loop, or how to use a tuple as a key.
 
 ## How this assignment was built
 
