@@ -1,123 +1,140 @@
-"""Ask the vehicle's network questions and print the answers.
+"""Ask what the car's sensors tell it and print the answers.
 
-Provided. Run it once `joint_probability` and `query` are written.
+Provided. Run it once `joint`, `evidence_probability` and `posterior` are
+written.
 
-    uv run python src/main.py           the questions, and both action tables
-    uv run python src/main.py tables    every conditional probability table
-    uv run python src/main.py ask pedestrians detected=no visibility=poor
-                                        one question of your own
+    uv run python src/main.py           every question, answered
+    uv run python src/main.py tables    every prior and likelihood table
 """
 
 import sys
 
-from bayesnet import Assignment, Network
-from vehicle import NETWORK, OCCUPANTS_FIRST, build_network, query
+from vehicle import (
+    ACTION,
+    AHEAD,
+    CAMERA,
+    DOWNTOWN,
+    HIGHWAY,
+    LABEL,
+    LIDAR,
+    OCCUPANTS_FIRST,
+    Distribution,
+    Likelihood,
+    evidence_probability,
+    joint,
+    naive_bayes,
+    posterior,
+)
 
-QUESTIONS: list[tuple[str, Assignment]] = [
-    ("pedestrians", {}),
-    ("pedestrians", {"action": "occupants"}),
-    ("pedestrians", {"detected": "yes"}),
-    ("pedestrians", {"detected": "no"}),
-    ("pedestrians", {"detected": "no", "visibility": "good"}),
-    ("pedestrians", {"detected": "no", "visibility": "poor"}),
-    ("detected", {"pedestrian_hurt": "yes"}),
-]
-
-
-def describe(variable: str, evidence: Assignment) -> str:
-    """Write a question as text, such as `pedestrians | detected = no`.
-
-    Args:
-        variable: The variable asked about.
-        evidence: The values observed.
-
-    Returns:
-        The question, with the evidence after a bar.
-    """
-    if not evidence:
-        return f"{variable}, nothing observed"
-    given = ", ".join(f"{name} = {value}" for name, value in evidence.items())
-    return f"{variable} | {given}"
+ROADS = {"downtown": DOWNTOWN, "highway": HIGHWAY}
 
 
-def answer(network: Network, variable: str, evidence: Assignment) -> str:
-    """Ask one question and lay out every value's probability.
+def row(label: str, cells: list[float]) -> str:
+    """Lay out one labelled row of numbers.
 
     Args:
-        network: The network to ask.
-        variable: The variable asked about.
-        evidence: The values observed.
+        label: The row's label.
+        cells: The numbers, printed to three places.
 
     Returns:
-        Each value followed by its probability, to three places.
+        The row as text.
     """
-    distribution = query(network, variable, evidence)
-    return "   ".join(
-        f"{value} {probability:.3f}"
-        for value, probability in distribution.items()
+    return f"  {label:<44}" + "".join(f"{cell:>11.3f}" for cell in cells)
+
+
+def show_joint() -> None:
+    """Print the camera's joint table downtown, with its column totals."""
+    table = joint(DOWNTOWN, CAMERA)
+    print("\nThe camera downtown, as a joint table\n")
+    print(f"  {'':<44}{'yes':>11}{'no':>11}")
+    for hypothesis in DOWNTOWN:
+        cells = [table[(hypothesis, report)] for report in ("yes", "no")]
+        print(row(f"pedestrian {hypothesis}", cells))
+    totals = [
+        evidence_probability(DOWNTOWN, CAMERA, report)
+        for report in ("yes", "no")
+    ]
+    print(row("P(camera = ...)", totals))
+
+
+def show_roads() -> None:
+    """Print what each report means downtown and on the highway."""
+    print(f"\nWhat a report means{'':<29}downtown    highway\n")
+    print(row("P(present)", [prior["present"] for prior in ROADS.values()]))
+    for name, sensor in (("camera", CAMERA), ("lidar", LIDAR)):
+        for report in ("yes", "no"):
+            cells = [
+                posterior(prior, sensor, report)["present"]
+                for prior in ROADS.values()
+            ]
+            print(row(f"P(present | {name} = {report})", cells))
+
+    print("\nA preview of naive Bayes: both sensors at once\n")
+    for camera, lidar in (("yes", "yes"), ("yes", "no"), ("no", "yes")):
+        cells = [
+            naive_bayes(prior, [CAMERA, LIDAR], [camera, lidar])["present"]
+            for prior in ROADS.values()
+        ]
+        print(row(f"P(present | camera = {camera}, lidar = {lidar})", cells))
+
+
+def show_label() -> None:
+    """Print what is ahead given each label, three hypotheses at once."""
+    print("\nWhat is ahead, from the camera's label\n")
+    print(f"  {'':<44}" + "".join(f"{name:>11}" for name in AHEAD))
+    print(row("prior", list(AHEAD.values())))
+    for label in ("person", "bicycle", "clear"):
+        belief = posterior(AHEAD, LABEL, label)
+        print(row(f"label = {label}", list(belief.values())))
+
+
+def show_action() -> None:
+    """Print what the car's action reveals, under both action tables."""
+    tables = [ACTION, OCCUPANTS_FIRST]
+    print(f"\nThe action as evidence, downtown{'':<17}ACTION  OCC_FIRST\n")
+    print(
+        row(
+            "P(action = occupants)",
+            [evidence_probability(DOWNTOWN, t, "occupants") for t in tables],
+        )
+    )
+    print(
+        row(
+            "P(present | action = occupants)",
+            [posterior(DOWNTOWN, t, "occupants")["present"] for t in tables],
+        )
     )
 
 
-def show_questions() -> None:
-    """Print every question's answer, then the two action tables compared."""
-    print("\nThe car's network, answered by enumeration\n")
-    for variable, evidence in QUESTIONS:
-        line = describe(variable, evidence)
-        print(f"  {line:<52}{answer(NETWORK, variable, evidence)}")
-
-    tables = [NETWORK, build_network(OCCUPANTS_FIRST)]
-    print(f"\nTwo action tables{'':<36}ACTION   OCCUPANTS_FIRST\n")
-    rows = [
-        ("P(pedestrian_hurt = yes)", "pedestrian_hurt", {}, "yes"),
-        ("P(occupant_hurt = yes)", "occupant_hurt", {}, "yes"),
-        (
-            "P(pedestrians = present | action = occupants)",
-            "pedestrians",
-            {"action": "occupants"},
-            "present",
-        ),
-    ]
-    for label, variable, evidence, value in rows:
-        cells = [
-            f"{query(network, variable, evidence)[value]:.3f}"
-            for network in tables
-        ]
-        print(f"  {label:<51}{cells[0]:>6}{cells[1]:>18}")
-
-
 def show_tables() -> None:
-    """Print every node's conditional probability table."""
-    for node in NETWORK.nodes:
-        parents = ", ".join(node.parents) if node.parents else "no parents"
-        print(f"\n{node.name}  ({parents})")
-        for row, distribution in node.table.items():
-            given = ", ".join(row) if row else ""
-            cells = "   ".join(
-                f"{value} {probability:.2f}"
-                for value, probability in distribution.items()
-            )
-            print(f"  {given:<22}{cells}")
-
-
-def ask(arguments: list[str]) -> None:
-    """Answer one question typed on the command line.
-
-    Args:
-        arguments: The variable's name, then any number of `name=value`.
-    """
-    variable, *observed = arguments
-    evidence = dict(item.split("=", 1) for item in observed)
-    if variable in evidence:
-        print(f"\n{variable} is observed, so there is nothing to ask.")
-        return
-    print(f"\n  {describe(variable, evidence)}")
-    print(f"  {answer(NETWORK, variable, evidence)}")
+    """Print every prior and every likelihood table."""
+    priors: dict[str, Distribution] = {
+        "DOWNTOWN": DOWNTOWN,
+        "HIGHWAY": HIGHWAY,
+        "AHEAD": AHEAD,
+    }
+    for name, prior in priors.items():
+        cells = "   ".join(f"{h} {p:.2f}" for h, p in prior.items())
+        print(f"\n{name}\n  {cells}")
+    tables: dict[str, Likelihood] = {
+        "CAMERA": CAMERA,
+        "LIDAR": LIDAR,
+        "LABEL": LABEL,
+        "ACTION": ACTION,
+        "OCCUPANTS_FIRST": OCCUPANTS_FIRST,
+    }
+    for name, table in tables.items():
+        print(f"\n{name}")
+        for hypothesis, reports in table.items():
+            cells = "   ".join(f"{e} {p:.2f}" for e, p in reports.items())
+            print(f"  given {hypothesis:<12}{cells}")
 
 
 if __name__ == "__main__":
     if sys.argv[1:] == ["tables"]:
         show_tables()
-    elif sys.argv[1:2] == ["ask"] and len(sys.argv) > 2:
-        ask(sys.argv[2:])
     else:
-        show_questions()
+        show_joint()
+        show_roads()
+        show_label()
+        show_action()

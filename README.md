@@ -2,84 +2,89 @@
 
 |                    |                                             |
 | :----------------- | :------------------------------------------ |
-| `Thursday 15 Oct`  | Released, in class                          |
+| `Thursday 15 Oct`  | Released                                    |
 | `Thursday 22 Oct`  | Due at 11:00am, the start of class          |
 | `Tuesday 27 Oct`   | Verbal checks, in lab                       |
 | Points             | 3                                           |
 
-An autonomous car faces an accident it cannot avoid. It takes either the
-action that protects its own occupants or the one that protects others,
-and it chooses based on what its sensors detect, which is not always
-what is there. A Bayesian network describes that moment, and inference by
-enumeration answers questions about it: given what we observed, how likely
-is each thing we did not?
+An autonomous car has to decide what is ahead of it from what its sensors
+report, and a sensor is sometimes wrong. A camera that detects 85% of
+pedestrians does not make a detection 85% likely to be a pedestrian: that
+depends on how often a pedestrian is there at all. Bayes' rule turns the
+car's prior and its sensor's likelihoods into what it should believe.
 
-You write the two functions that answer the questions. The network and the
+You write the three functions that do it. The car's tables and the
 questions are provided.
 
 ## Course learning outcomes
 
 1. **Outcome 3.** Design, implement, and assess an intelligent system. You
-   implement exact inference for a Bayesian network and assess what the
-   car's network concludes from each observation.
+   implement Bayes' rule for any number of hypotheses and assess what one
+   sensor report, and then two, tell the car.
 2. **Outcome 5.** Evaluate intelligent systems while considering their
    social, political, and ethical implications. You compare two action
-   tables by who each one hurts, and argue who should choose between them.
+   tables for an accident the car cannot avoid, and argue who should choose
+   between them.
 
-## The network
+## The tables
 
-Six variables. Each one's table, in `src/vehicle.py`, gives its
-probabilities for every combination of its parents' values.
+Everything is in `src/vehicle.py`. A **prior** gives each hypothesis its
+probability. A **likelihood table** gives, for each hypothesis, the
+probability of every value a sensor can report.
 
-| Variable          | Values                | Parents                     |
-| :---------------- | :-------------------- | :-------------------------- |
-| `pedestrians`     | `present`, `absent`   | none                        |
-| `visibility`      | `good`, `poor`        | none                        |
-| `detected`        | `yes`, `no`           | `pedestrians`, `visibility` |
-| `action`          | `occupants`, `others` | `detected`                  |
-| `pedestrian_hurt` | `yes`, `no`           | `pedestrians`, `action`     |
-| `occupant_hurt`   | `yes`, `no`           | `action`                    |
+| Name              | What it holds                                          |
+| :---------------- | :----------------------------------------------------- |
+| `DOWNTOWN`        | a prior: a pedestrian is present 30% of the time       |
+| `HIGHWAY`         | a prior: a pedestrian is present 1% of the time        |
+| `CAMERA`          | says yes to 85% of pedestrians and 10% of empty roads  |
+| `LIDAR`           | says yes to 90% of pedestrians and 5% of empty roads   |
+| `AHEAD`, `LABEL`  | pedestrian, cyclist or nothing, and the camera's label |
+| `ACTION`          | how often the car protects its occupants               |
+| `OCCUPANTS_FIRST` | a car that protects its occupants every time           |
 
-`action = occupants` is the action that protects the car's occupants.
 `ACTION` is the action table from this course's 2023 version of this
-problem: the car protects its occupants with probability 0.5 when it
-detects pedestrians and 0.8 when it does not. `OCCUPANTS_FIRST` protects
-them every time.
+problem: in an accident it cannot avoid, the car protects its occupants
+with probability 0.5 when a pedestrian is present and 0.8 when not.
 
 Every number in every table is invented for this challenge.
 
 ## What you implement
 
-Two functions in `src/vehicle.py`. Everything else is provided.
+Three functions in `src/vehicle.py`. Everything else is provided.
 
-### 1. `joint_probability(network, assignment)`
+### 1. `joint(prior, likelihood)`
 
-Return the probability of one complete assignment: one entry from each
-node's table, multiplied together.
+Return the joint probability of every hypothesis and every report, keyed
+`(hypothesis, report)`. The product rule: P(h and e) = P(h) P(e | h).
 
-### 2. `query(network, variable, evidence)`
+### 2. `evidence_probability(prior, likelihood, observed)`
 
-Return the distribution of one variable given the evidence, as a
-dictionary from each of its values to a probability. Use inference by
-enumeration: sum the joint over the hidden variables, then normalize.
+Return P(observed). The law of total probability: add P(h) P(e | h) over
+the hypotheses.
 
-`src/bayesnet.py` holds `Node`, `Network` and `assignments`. Read its
-docstring first; the example at the top shows every piece you need.
+### 3. `posterior(prior, likelihood, observed)`
+
+Return P(h | observed) for every hypothesis, by Bayes' rule. It must work
+for any number of hypotheses.
+
+### Provided: `naive_bayes`
+
+`naive_bayes` combines several sensors' reports by calling your
+`posterior` once per report, so the posterior after one report is the prior
+for the next. That is **naive Bayes**: it assumes the sensors make their
+mistakes independently once the hypothesis is known. Read it; it is four
+lines, and it is right only if your `posterior` is.
 
 ## Running it
 
 ```
-uv run python src/main.py              the questions, and both action tables
-uv run python src/main.py tables       every conditional probability table
-uv run python src/main.py ask pedestrians detected=no visibility=poor
+uv run python src/main.py              every question, answered
+uv run python src/main.py tables       every prior and likelihood table
 uv run pytest                          run the tests
 uv run ruff check src tests            check your style
 uv run ruff format src tests           fix most style problems automatically
 uv run gatorgrade                      run the checks the way they are graded
 ```
-
-`ask` answers any question you type: the variable first, then what was
-observed as `name=value`.
 
 ## Style
 
@@ -103,13 +108,14 @@ This challenge is worth **3 points**.
 Run by `gatorgrade`, awarded as the fraction of the **code** checks that
 pass. These are:
 
-- `joint_probability` multiplies the right entry from each table, and the
-  joint sums to 1, on the car's network and on a second network.
-- `query` sums out the hidden variables, uses every piece of evidence,
-  returns probabilities that add up to 1, and leaves the evidence it was
-  given unchanged.
-- The car's network gives the answers it should to the questions in
-  `main.py`.
+- `joint` multiplies each prior by its likelihood, has a cell for every
+  pair, and sums to 1, on the car and on the spam filter from class.
+- `evidence_probability` adds over the hypotheses, weighted by the prior.
+- `posterior` turns a likelihood around into a posterior, reads the report
+  that was observed, works for three hypotheses, adds up to 1, and leaves
+  its arguments unchanged.
+- `naive_bayes`, built on your `posterior`, and the action table give the
+  answers they should.
 - Style passes `ruff` and type annotations check out under `mypy`.
 - No `TODO` markers are left in `src/vehicle.py`.
 
@@ -145,24 +151,25 @@ explain what you submit.
 
 Concretely, for this assignment:
 
-- **Write `joint_probability` and `query` yourself.** They are this week's
-  idea.
-- **Check one answer by hand.** P(pedestrians | detected = no, visibility =
-  poor) needs two rows of the `detected` table and Bayes' rule. Compare it
-  with `ask`.
-- **A tool is useful** for the Python around the inference: how to copy a
-  dictionary, or what `tuple(...)` builds from a list.
+- **Write `joint`, `evidence_probability` and `posterior` yourself.** They
+  are this week's idea.
+- **Check one answer by hand.** P(present | camera = yes) on the highway
+  needs two cells of the camera's table and the prior. Work it out on paper
+  and compare it with `main.py`.
+- **A tool is useful** for the Python around the probability: how to build
+  a dictionary with a comprehension, or how to loop over a dictionary's
+  keys and values together.
 
 ## How this assignment was built
 
 You are asked below to disclose your AI use, so here is mine.
 
-I decided the shape: the 2023 autonomous vehicle question rebuilt as a
-network where the car acts on what it detects, two action tables to
-compare, and two functions for you to write.
+I decided the shape: the 2023 autonomous vehicle question rebuilt around
+the car's sensors, the probability we worked by hand in class, two action
+tables to compare, and three functions for you to write.
 
-I used Claude to draft `bayesnet.py`, the tests and `main.py`, and to
-compute every probability the tests expect. I ran the reference solution
+I used Claude to draft the tables, the tests and `main.py`, and to compute
+every probability the tests expect. I ran the reference solution
 and the unfinished starter against every check, and checked the checks
 against wrong versions of both functions, not only against empty ones.
 

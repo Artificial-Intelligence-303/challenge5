@@ -9,9 +9,9 @@ body:
         answers two or three questions about their own code in the context of the
         assignment at hand. This is a check on understanding, not a presentation.
 
-        Challenge 5 asked for two functions in `src/vehicle.py`: `joint_probability`,
-        which multiplies one entry from each node's table, and `query`, which answers
-        a question by enumeration. Every line below is about one of those two.
+        Challenge 5 asked for three functions in `src/vehicle.py`: `joint`, the
+        product rule; `evidence_probability`, the law of total probability; and
+        `posterior`, Bayes' rule. Every line below is about one of those three.
         Questions for each line, with what to listen for:
         https://areweagentsyet.com/tl/verbal-checks-challenge-05/
   - type: input
@@ -24,10 +24,10 @@ body:
       label: Understanding
       description: Tick each line the student explained correctly, in their own words. Two or three questions is enough; no line needs their code open or a remembered number.
       options:
-        - label: "The product they wrote. Which row of a table `joint_probability` reads, and why the joint of a network is a product of table entries."
-        - label: "The sum they wrote. Which variables `query` sums over, which it holds fixed, and what the sum for one value means."
-        - label: "Normalizing. What the sums are before scaling, why they do not add to 1, and what alpha is."
-        - label: "Reading the network. Why evidence about the action says less about pedestrians than in 2023, or why poor visibility changes what a missed detection means."
+        - label: "The table they built. What one cell of `joint` is, and why the cells add to 1."
+        - label: "The sum they wrote. What `evidence_probability` adds up, and why each term is weighted by the prior."
+        - label: "Bayes' rule. Why `posterior` divides by P(e), and why P(present | yes) is not P(yes | present)."
+        - label: "Reading the answers. Why the same detection means less on the highway, why two sensors together say more than one, or why OCCUPANTS_FIRST reveals nothing."
   - type: dropdown
     attributes:
       label: Outcome

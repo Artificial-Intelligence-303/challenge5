@@ -1,7 +1,7 @@
 [project]
 name = "challenge-05-autonomous-vehicle"
 version = "1.0.0"
-description = "CMPSC 303 Challenge 5: an autonomous vehicle as a Bayesian network."
+description = "CMPSC 303 Challenge 5: what an autonomous car's sensors tell it, by Bayes' rule."
 requires-python = ">=3.11"
 dependencies = [
     "gatorgrade",

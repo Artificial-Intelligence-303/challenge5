@@ -5,80 +5,90 @@
 # These are the same checks that run on GitHub when you push. Results are
 # preliminary: the final grade is determined by the instructor.
 
-- description: "[JOINT] The joint is one entry from each table, multiplied"
+- description: "[JOINT] The joint table has a cell for every hypothesis and report"
   check: ExecuteCommand
   options:
-    command: uv run pytest tests/test_vehicle.py::test_joint_is_one_entry_from_each_table_multiplied
+    command: uv run pytest tests/test_vehicle.py::test_joint_has_an_entry_for_every_hypothesis_and_report
 
-- description: "[JOINT] The joint reads the row for the parents' values"
+- description: "[JOINT] Each cell is the prior times the likelihood"
   check: ExecuteCommand
   options:
-    command: uv run pytest tests/test_vehicle.py::test_joint_reads_the_row_for_the_parents_values
+    command: uv run pytest tests/test_vehicle.py::test_joint_is_the_prior_times_the_likelihood
 
-- description: "[JOINT] The joint is zero where a table says impossible"
+- description: "[JOINT] The joint table sums to 1"
   check: ExecuteCommand
   options:
-    command: uv run pytest tests/test_vehicle.py::test_joint_is_zero_where_a_table_says_impossible
+    command: uv run pytest tests/test_vehicle.py::test_joint_sums_to_one
 
-- description: "[JOINT] The joint sums to 1 over all 64 assignments"
+- description: "[JOINT] The joint builds the worksheet's spam filter table"
   check: ExecuteCommand
   options:
-    command: uv run pytest tests/test_vehicle.py::test_joint_sums_to_one_over_every_assignment
+    command: uv run pytest tests/test_vehicle.py::test_joint_builds_the_worksheet_table
 
-- description: "[JOINT] The joint works on a second network, the Week 7 detector"
+- description: "[EVIDENCE] P(e) adds P(h) * P(e | h) over the hypotheses"
   check: ExecuteCommand
   options:
-    command: uv run pytest tests/test_vehicle.py::test_joint_works_on_a_second_network
+    command: uv run pytest tests/test_vehicle.py::test_evidence_probability_adds_over_the_hypotheses
 
-- description: "[QUERY] A query answers for every value of the variable"
+- description: "[EVIDENCE] P(flagged) is 0.206, as on the worksheet"
   check: ExecuteCommand
   options:
-    command: uv run pytest tests/test_vehicle.py::test_query_gives_a_value_for_every_value_of_the_variable
+    command: uv run pytest tests/test_vehicle.py::test_evidence_probability_matches_the_worksheet
 
-- description: "[QUERY] With no evidence, a node with no parents gets its own table"
+- description: "[EVIDENCE] P(yes) and P(no) add up to 1"
   check: ExecuteCommand
   options:
-    command: uv run pytest tests/test_vehicle.py::test_query_with_no_evidence_gives_a_parentless_node_its_table
+    command: uv run pytest tests/test_vehicle.py::test_evidence_probabilities_add_up_to_one
 
-- description: "[QUERY] A query sums out the hidden variables"
+- description: "[POSTERIOR] A flagged essay is AI-written with probability 2/3"
   check: ExecuteCommand
   options:
-    command: uv run pytest tests/test_vehicle.py::test_query_sums_out_the_hidden_variables
+    command: uv run pytest tests/test_vehicle.py::test_posterior_turns_a_flag_around_into_the_author
 
-- description: "[QUERY] Every answer adds up to 1"
+- description: "[POSTERIOR] The posterior reads the report that was observed"
   check: ExecuteCommand
   options:
-    command: uv run pytest tests/test_vehicle.py::test_query_answers_add_up_to_one
+    command: uv run pytest tests/test_vehicle.py::test_posterior_reads_the_report_that_was_observed
 
-- description: "[QUERY] A flagged essay is AI-written with probability 2/3, as in Week 7"
+- description: "[POSTERIOR] P(present | yes) is not P(yes | present)"
   check: ExecuteCommand
   options:
-    command: uv run pytest tests/test_vehicle.py::test_query_turns_a_flag_around_into_the_author
+    command: uv run pytest tests/test_vehicle.py::test_posterior_is_not_the_likelihood
 
-- description: "[QUERY] A query uses two pieces of evidence together"
+- description: "[POSTERIOR] The same report means less on the highway"
   check: ExecuteCommand
   options:
-    command: uv run pytest tests/test_vehicle.py::test_query_uses_two_pieces_of_evidence
+    command: uv run pytest tests/test_vehicle.py::test_posterior_depends_on_the_prior
 
-- description: "[QUERY] A query leaves the caller's evidence unchanged"
+- description: "[POSTERIOR] Bayes' rule works for three hypotheses"
   check: ExecuteCommand
   options:
-    command: uv run pytest tests/test_vehicle.py::test_query_leaves_the_evidence_unchanged
+    command: uv run pytest tests/test_vehicle.py::test_posterior_works_for_three_hypotheses
 
-- description: "[CAR] The question from 2023: pedestrians, given the car protected its occupants"
+- description: "[POSTERIOR] Every posterior adds up to 1"
   check: ExecuteCommand
   options:
-    command: uv run pytest tests/test_vehicle.py::test_the_question_from_2023
+    command: uv run pytest tests/test_vehicle.py::test_posterior_answers_add_up_to_one
 
-- description: "[CAR] Poor visibility makes a missed detection mean less"
+- description: "[POSTERIOR] Evidence every hypothesis agrees on leaves the prior"
   check: ExecuteCommand
   options:
-    command: uv run pytest tests/test_vehicle.py::test_poor_visibility_makes_a_missed_detection_mean_less
+    command: uv run pytest tests/test_vehicle.py::test_evidence_every_hypothesis_agrees_on_leaves_the_prior
 
-- description: "[CAR] The two action tables trade one harm for another"
+- description: "[POSTERIOR] The posterior leaves the prior and the table unchanged"
   check: ExecuteCommand
   options:
-    command: uv run pytest tests/test_vehicle.py::test_the_two_action_tables_trade_one_harm_for_another
+    command: uv run pytest tests/test_vehicle.py::test_posterior_leaves_its_arguments_unchanged
+
+- description: "[CAR] Naive Bayes, built on your posterior, combines both sensors"
+  check: ExecuteCommand
+  options:
+    command: uv run pytest tests/test_vehicle.py::test_naive_bayes_combines_both_sensors
+
+- description: "[CAR] The car's action is evidence about the pedestrian"
+  check: ExecuteCommand
+  options:
+    command: uv run pytest tests/test_vehicle.py::test_the_action_as_evidence
 
 - description: "[STYLE] Code follows the Google Python style guide"
   check: ExecuteCommand
