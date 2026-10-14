@@ -8,12 +8,6 @@ body:
         Filled in by the instructor or a technical leader during lab. The student
         answers two or three questions about their own code in the context of the
         assignment at hand. This is a check on understanding, not a presentation.
-
-        Challenge 5 asked for three functions in `src/vehicle.py`: `joint`, the
-        product rule; `evidence_probability`, the law of total probability; and
-        `posterior`, Bayes' rule. Every line below is about one of those three.
-        Questions for each line, with what to listen for:
-        https://areweagentsyet.com/tl/verbal-checks-challenge-05/
   - type: input
     attributes:
       label: Student
@@ -24,10 +18,10 @@ body:
       label: Understanding
       description: Tick each line the student explained correctly, in their own words. Two or three questions is enough; no line needs their code open or a remembered number.
       options:
-        - label: "The table they built. What one cell of `joint` is, and why the cells add to 1."
-        - label: "The sum they wrote. What `evidence_probability` adds up, and why each term is weighted by the prior."
-        - label: "Bayes' rule. Why `posterior` divides by P(e), and why P(present | yes) is not P(yes | present)."
-        - label: "Reading the answers. Why the same detection means less on the highway, why two sensors together say more than one, or why OCCUPANTS_FIRST reveals nothing."
+        - label: "The table they built: how `joint` works out a cell, and what the table as a whole describes."
+        - label: "The sum they wrote: what `evidence_probability` computes, and how."
+        - label: "Bayes' rule: how `posterior` turns a report into a belief."
+        - label: "Reading the answers: why one of the challenge's results came out the way it did."
   - type: dropdown
     attributes:
       label: Outcome
