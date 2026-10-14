@@ -64,9 +64,8 @@ LABEL: Likelihood = {
 
 # The car faces an accident it cannot avoid. It takes either the action
 # that protects its own occupants or the one that protects others. The
-# action table from this course's 2023 version of this problem: the car
-# protects its occupants half the time when a pedestrian is present, and
-# 0.8 of the time when not.
+# action table: the car protects its occupants half the time when a
+# pedestrian is present, and 0.8 of the time when not.
 ACTION: Likelihood = {
     "present": {"occupants": 0.5, "others": 0.5},
     "absent": {"occupants": 0.8, "others": 0.2},

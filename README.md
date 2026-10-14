@@ -42,9 +42,9 @@ probability of every value a sensor can report.
 | `ACTION`          | how often the car protects its occupants               |
 | `OCCUPANTS_FIRST` | a car that protects its occupants every time           |
 
-`ACTION` is the action table from this course's 2023 version of this
-problem: in an accident it cannot avoid, the car protects its occupants
-with probability 0.5 when a pedestrian is present and 0.8 when not.
+`ACTION` is the action table: in an accident it cannot avoid, the car
+protects its occupants with probability 0.5 when a pedestrian is present
+and 0.8 when not.
 
 Every number in every table is invented for this challenge.
 
@@ -194,9 +194,9 @@ Concretely, for this assignment:
 
 You are asked below to disclose your AI use, so here is mine.
 
-I decided the shape: the 2023 autonomous vehicle question rebuilt around
-the car's sensors, the probability we worked by hand in class, two action
-tables to compare, and three functions for you to write.
+I came up with the autonomous vehicle question and decided its shape: the
+car's sensors, the probability we worked by hand in class, two action tables
+to compare, and three functions for you to write.
 
 I used Claude to draft the tables, the tests and `main.py`, and to compute
 every probability the tests expect. I ran the reference solution
