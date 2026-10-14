@@ -92,7 +92,8 @@ It is the table of 1,000 cases from class, without the 1,000. `joint`
 fills in the cells; `evidence_probability` is a column total; `posterior`
 divides each cell in a column by that column's total.
 
-Each function's docstring works one example by hand, the lidar downtown.
+Each function's docstring works the same example by hand: the car is
+downtown (prior `DOWNTOWN`) and the sensor is the lidar (likelihood `LIDAR`).
 Write the functions in order and check each against its example before the
 next, because `posterior` calls `evidence_probability`:
 

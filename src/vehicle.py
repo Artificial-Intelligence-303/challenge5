@@ -27,9 +27,11 @@ From a formula to a dictionary lookup:
     P(h)        prior[hypothesis]              DOWNTOWN["present"] is 0.3
     P(e | h)    likelihood[hypothesis][report] LIDAR["present"]["yes"] is 0.9
 
-Every docstring below works one example by hand: the lidar downtown. Check
-each function against it as you write it, before moving on, because
-`posterior` calls `evidence_probability`. For example, in `uv run python`:
+Every docstring below works through the same example by hand. The car is
+downtown, so the prior is `DOWNTOWN`, and the sensor is the lidar, so the
+likelihood is `LIDAR`. Check each function against that example as you
+write it, before moving on, because `posterior` calls
+`evidence_probability`. For example, in `uv run python`:
 
     >>> import sys; sys.path.insert(0, "src")
     >>> from vehicle import DOWNTOWN, LIDAR, evidence_probability
@@ -95,7 +97,7 @@ def joint(
     `likelihood[hypothesis]`. Store `prior[hypothesis]` times
     `likelihood[hypothesis][report]` under the key `(hypothesis, report)`.
 
-    Worked example, the lidar downtown:
+    Worked example, downtown with the lidar:
 
         ("present", "yes")   0.3 * 0.90 = 0.270
         ("present", "no")    0.3 * 0.10 = 0.030
@@ -131,7 +133,7 @@ def evidence_probability(
     In code: start a total at 0, loop over the hypotheses in `prior`, and
     add `prior[hypothesis] * likelihood[hypothesis][observed]` each time.
 
-    Worked example, the lidar downtown says yes:
+    Worked example, downtown, when the lidar says yes:
 
         P(yes) = 0.3 * 0.90 + 0.7 * 0.05 = 0.270 + 0.035 = 0.305
 
@@ -164,7 +166,7 @@ def posterior(
     new, empty dictionary, loop over the hypotheses in `prior`, and store
     each one's top divided by the bottom. Do not change `prior`.
 
-    Worked example, the lidar downtown says yes:
+    Worked example, downtown, when the lidar says yes:
 
         P(present | yes) = 0.90 * 0.3 / 0.305 = 0.270 / 0.305 = 0.885
         P(absent | yes)  = 0.05 * 0.7 / 0.305 = 0.035 / 0.305 = 0.115
